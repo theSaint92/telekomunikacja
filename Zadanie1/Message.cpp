@@ -2,7 +2,6 @@
 #include <iostream>
 
 
-
 Message::Message()
 {
 	this->errorMatrix1.change("1ErrorMatrix.txt");
