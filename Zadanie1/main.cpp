@@ -1,5 +1,4 @@
 #include <iostream>
-#include <bitset>
 #include <string>
 #include <fstream>
 #include "Message.h"
@@ -30,7 +29,7 @@ int main(int argc, char* argv[])
 		}
 	}
 	
-	// TERAZ PROGRAM ZBIERAMY PARAMETRY (SPRAWDZAMY TEZ CZY SA DOBRZE WPISANE)
+	// TERAZ ZBIERAMY PARAMETRY (SPRAWDZAMY TEZ CZY SA DOBRZE WPISANE)
 	if (argc != 3) {
 		cout << "Bad format of command. Write Zadanie1.exe --help to get help";
 		return 0;
@@ -66,36 +65,22 @@ int main(int argc, char* argv[])
 
 	//JUZ WIEMY CO CHCEMY ZROBIC - NO TO NAJPIERW ZDEFINUJMY KTOREGO TYPU JEST NASZ MESSAGE
 
-	Message Zbadaj(argv[2]);
-	cout << Zbadaj.getTypeOfMessage();
-
-	//// DOBRA JEDNAK NIE DLA HELPA - To
-
-	//Message Zbadaj(argv[3]);
-
-	//char c = 'A';
-
-	//unsigned long x = c; // Look ma! No cast!
-
-	//cout << "The character '" << c << "' has an ASCII code of " << x << endl;
-
-	//std::string binary = std::bitset<8>(x).to_string(); //to binary
-	//std::cout << binary << "\n";
-
-	//unsigned long decimal = std::bitset<8>(binary).to_ulong();
-	//std::cout << decimal << "\n";
-
-	//try {
-	//	Zbadaj.messageToBinary();
-	//}
-	//catch (exception& error) {
-	//	cout << error.what();
-	//}
-
-	//
-
-
-	//getchar();
+	Message myMessage(argv[2]);
+	if (myMessage.getTypeOfMessage() == EMPTY) {
+		cout << "Wybrany plik jest pusty...";
+	}
+	else if (execType == CONVERT_TO_BINARY) {
+		cout << myMessage.messageToBinary();
+	}
+	else if (execType == ENCODE_TO_CODE1) {
+		cout << myMessage.encodeBinary(1);
+	}
+	else if (execType == ENCODE_TO_CODE2) {
+		cout << myMessage.encodeBinary(2);
+	}
+	else if (execType == DECODE) {
+		cout << myMessage.decode();
+	}
 	return 0;
 }
 

@@ -1,7 +1,6 @@
 #pragma once
 #include "Matrix.h"
 #include <string>
-#include <exception>
 
 using namespace std;
 
@@ -28,8 +27,7 @@ public:
 	TypeOfMessage getTypeOfMessage();
 	void checkTypeOfMessage();
 
-	void messageToBinary();
-	void encodeBinary1();
-	void encodeBinary2();
-	void decode();
+	string messageToBinary();
+	string encodeBinary(int i);
+	string decode();
 };
