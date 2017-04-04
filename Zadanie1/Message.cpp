@@ -146,17 +146,23 @@ string Message::decode() {
 	fwm.open(this->fileWithMessage);
 	string result;
 
+	// ----------------------------------------------------------------
 	// 1 PRZYPADEK - EMPTY MESSAGE
+	// ----------------------------------------------------------------
 	if (this->typeOfMessage == EMPTY) {
 		result = "This is empty file!";
 	}
 
+	// ----------------------------------------------------------------
 	// 2 PRZYPADEK - WIADMOSC NIE W FORMIE DO DEKODOWANIA
+	// ----------------------------------------------------------------
 	else if (this->typeOfMessage == NO_CODING) {
 		result = "This file isn't in correct form for decoding!";
 	}
 
+	// ----------------------------------------------------------------
 	// 3 PRZYPADEK - KONWERTUJEMY Z BINARKI DO CZYTELNEJ WIADOMOSCI
+	// ----------------------------------------------------------------
 	else if (this->typeOfMessage == BINARY_FORM) {
 		string binary;
 		while (!fwm.eof()) {
@@ -167,28 +173,140 @@ string Message::decode() {
 		}
 	}
 
+	// ----------------------------------------------------------------
 	// 4 PRZYPADEK - KONWERTUJEMY Z ENCODED_FOR_1_ERROR NA BINARY_FORM
+	// ----------------------------------------------------------------
 	else if (this->typeOfMessage == ENCODED_FOR_1_ERROR) {
-		//string binary;
-		//while (!fwm.eof()) {
-		//	getline(fwm, binary);
-		//	//WPISUJEMY WARTOSC SLOWA BINARY W MACIERZ message
-		//	for (unsigned int i = 0; i < 12; i++) {
-		//		message.set(i,0, static_cast<double>(binary[i]-'0')); 
-		//	}
-		//	cout << binary;
-		//	//HEHE JEST FAJNIE MAMY - BADAMY ILOCZYN Z MACIERZA errorMatrix1
-		//	cout << errorMatrix1.getM() << " " << message.getN();
-		//	//Matrix multiply = errorMatrix1*message;
-		//	cout << (errorMatrix1*message).toString();
-		//}
-		result = " ";
+		string binary;
+		int multiplyResult[4] = { 0,0,0,0 };
+		int intSuma = 0;
+
+		while (!fwm.eof()) {
+			getline(fwm, binary);
+			
+			//WYZNACZAMY NASZ multiplyResult
+			for (int i = 0; i < 4; i++) {
+				for (int j = 0; j < 12; j++) {
+					multiplyResult[i] += errorMatrix1[i][j] * static_cast<unsigned int>(binary[j] - '0');
+				}
+				multiplyResult[i] %= 2;
+				intSuma += multiplyResult[i];	
+			}
+			//OK JEZELI intSuma JEST ROWNY 0, TO NASZE SLOWO TO PIERWSZE 8 BITOW TEJ WIADOMOSCI. CZYLI...
+			if (intSuma == 0) {
+				result.append(binary.substr(0, 8));
+				result.append("\n");
+			}
+			//ALE JEZELI NIE JEST TO COS TRZEBA POPRAWIC! SZUKAMY WIEC GDZIE JEST BLAD I GO KORYGUJEMY
+			else {
+				int errorSpottedOn = -1;
+				for (int i = 0; i < 12; i++) {
+					for (int j = 0; j < 4; j++) {
+						if (multiplyResult[j] != errorMatrix1[j][i])
+							break;
+						if (j == 3) errorSpottedOn = i;
+					}
+					if (errorSpottedOn != -1)
+						break;
+				}
+				//DOBRA! WIEMY GDZIE ERROR PODMIENIAMY GO TERAZ
+				if (binary[errorSpottedOn] == '1') binary[errorSpottedOn] = '0';
+				else if (binary[errorSpottedOn] == '0') binary[errorSpottedOn] = '1';
+
+				//I WYPISUJEMY SLOWO
+				result.append(binary.substr(0, 8));
+				result.append("\n");
+			}
+
+			
+			/*for (int i = 0; i < 4; i++) {
+				cout << multiplyResult[i] <<" ";			
+			cout << endl;*/
+
+			//ZEROWANIE DLA NASTEPNEGO LOOPA
+			intSuma = 0;
+			for (int i = 0; i < 4; i++) {
+				multiplyResult[i] = 0;
+			}
+		}
+
+		//OBCINAMY OSTATNI 'ENTER'
+		result = result.substr(0, result.size() - 1);
 	}
 
+	// ----------------------------------------------------------------
 	// 5 PRZYPADEK - KONWERTUJEMY Z ENCODED_FOR_2_ERRORS NA BINARY_FORM
+	// ----------------------------------------------------------------
 	else if (this->typeOfMessage == ENCODED_FOR_2_ERRORS) {
-		//TUTAJ BEDZIE DUZO KODU
-		result = " ";
+		string binary;
+		int multiplyResult[9] = { 0,0,0,0,0,0,0,0,0 };
+		int intSuma = 0;
+
+		while (!fwm.eof()) {
+			getline(fwm, binary);
+
+			//WYZNACZAMY NASZ multiplyResult
+			for (int i = 0; i < 9; i++) {
+				for (int j = 0; j < 17; j++) {
+					multiplyResult[i] += errorMatrix2[i][j] * static_cast<unsigned int>(binary[j] - '0');
+				}
+				multiplyResult[i] %= 2;
+				intSuma += multiplyResult[i];
+			}
+			//OK JEZELI intSuma JEST ROWNY 0, TO NASZE SLOWO TO PIERWSZE 8 BITOW TEJ WIADOMOSCI. CZYLI...
+			if (intSuma == 0) {
+				result.append(binary.substr(0, 8));
+				result.append("\n");
+			}
+			//ALE JEZELI NIE JEST TO COS TRZEBA POPRAWIC! SZUKAMY WIEC GDZIE JEST BLAD I GO KORYGUJEMY
+			else {
+				int errorSpottedOn[2] = { -1,-1 };
+				for (int i = 0; i < 17; i++) {
+					for (int j = i + 1; j < 17; j++) {
+						for (int k = 0; k < 9; k++) {
+							//cout << "ANALIZUJEMY: [" << i << "," << j << "] " << multiplyResult[k] << " " << errorMatrix1[k][i] << " " << errorMatrix1[k][j] << " " << (errorMatrix1[k][i] + errorMatrix1[k][j]) % 2 << endl;
+							if (multiplyResult[k] != (errorMatrix2[k][i] + errorMatrix2[k][j])%2 )
+								break;
+							if (k == 8) {
+								errorSpottedOn[0] = i;
+								errorSpottedOn[1] = j;
+							}
+						}
+						if (errorSpottedOn[0] != -1)
+							break;
+					}
+					if (errorSpottedOn[0] != -1)
+						break;
+				}
+				
+				//cout << "ERRORY SPOTTED ON " << errorSpottedOn[0] << " , " << errorSpottedOn[1] << endl;
+
+				//DOBRA! WIEMY GDZIE ERROR PODMIENIAMY GO TERAZ
+				for (int i = 0; i < 2; i++) {
+					if (binary[errorSpottedOn[i]] == '1') binary[errorSpottedOn[i]] = '0';
+					else if (binary[errorSpottedOn[i]] == '0') binary[errorSpottedOn[i]] = '1';
+				}
+
+				//I WYPISUJEMY SLOWO
+				result.append(binary.substr(0, 8));
+				result.append("\n");
+			}
+
+
+			//for (int i = 0; i < 9; i++) {
+			//	cout << multiplyResult[i] << " ";
+			//}
+			//cout << endl;
+
+			//ZEROWANIE DLA NASTEPNEGO LOOPA
+			intSuma = 0;
+			for (int i = 0; i < 9; i++) {
+				multiplyResult[i] = 0;
+			}
+		}
+
+		//OBCINAMY OSTATNI 'ENTER'
+		result = result.substr(0, result.size() - 1);
 	}
 
 	return result;
