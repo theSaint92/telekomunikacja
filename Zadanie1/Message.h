@@ -6,6 +6,7 @@
 using namespace std;
 
 enum TypeOfMessage {
+	EMPTY,
 	NO_CODING,
 	BINARY_FORM,
 	ENCODED_FOR_1_ERROR,
@@ -24,9 +25,11 @@ public:
 	Message(char* file);
 	~Message();
 
+	TypeOfMessage getTypeOfMessage();
+	void checkTypeOfMessage();
+
 	void messageToBinary();
-	void codeBinary1();
-	void codeBinary2();
-	TypeOfMessage checkTypeOfMessage();
-	void decodeBinary();
+	void encodeBinary1();
+	void encodeBinary2();
+	void decode();
 };
