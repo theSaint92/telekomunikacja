@@ -8,8 +8,6 @@
 Message::Message(char* file)
 {
 	//INICJALIZUJEMY MACIERZE I OKRESLAMY PLIK MESSAGE'a
-	this->errorMatrix1.change("1ErrorMatrix.txt");
-	this->errorMatrix2.change("2ErrorMatrix.txt");
 	this->fileWithMessage = file;
 	this->checkTypeOfMessage();
 }
@@ -122,8 +120,8 @@ string Message::encodeBinary(int noOfErrors) {
 			//DOBRA MAMY POBRANĄ LINIJKE W  BINARY_FORM - DODAJEMY BITY PARZYSTOSCI
 			for (unsigned int i = 0; i < numberOfLoops; i++) {
 				for (unsigned int j = 0; j < 8; j++) {
-					if (noOfErrors ==1) added_bit += static_cast<unsigned int>(errorMatrix1.get(i, j)) * static_cast<unsigned int>(binary[j] - '0'); // Dla korekcji jednego bledu
-					else if (noOfErrors==2) added_bit += static_cast<unsigned int>(errorMatrix2.get(i, j)) * static_cast<unsigned int>(binary[j] - '0'); //Dla korekcji 2 bledow
+					if (noOfErrors ==1) added_bit += static_cast<unsigned int>(errorMatrix1[i][j]) * static_cast<unsigned int>(binary[j] - '0'); // Dla korekcji jednego bledu
+					else if (noOfErrors==2) added_bit += static_cast<unsigned int>(errorMatrix2[i][j]) * static_cast<unsigned int>(binary[j] - '0'); //Dla korekcji 2 bledow
 				}
 				added_bit %= 2;
 				result.append(1,static_cast<char>(added_bit+'0'));
@@ -171,20 +169,19 @@ string Message::decode() {
 
 	// 4 PRZYPADEK - KONWERTUJEMY Z ENCODED_FOR_1_ERROR NA BINARY_FORM
 	else if (this->typeOfMessage == ENCODED_FOR_1_ERROR) {
-		string binary;
-		Matrix message(12, 1);
-		while (!fwm.eof()) {
-			getline(fwm, binary);
-			//WPISUJEMY WARTOSC SLOWA BINARY W MACIERZ message
-			for (unsigned int i = 0; i < 12; i++) {
-				message.set(i,0, static_cast<double>(binary[i]-'0')); 
-			}
-			cout << binary;
-			//HEHE JEST FAJNIE MAMY - BADAMY ILOCZYN Z MACIERZA errorMatrix1
-			cout << errorMatrix1.getM() << " " << message.getN();
-			//Matrix multiply = errorMatrix1*message;
-			cout << (errorMatrix1*message).toString();
-		}
+		//string binary;
+		//while (!fwm.eof()) {
+		//	getline(fwm, binary);
+		//	//WPISUJEMY WARTOSC SLOWA BINARY W MACIERZ message
+		//	for (unsigned int i = 0; i < 12; i++) {
+		//		message.set(i,0, static_cast<double>(binary[i]-'0')); 
+		//	}
+		//	cout << binary;
+		//	//HEHE JEST FAJNIE MAMY - BADAMY ILOCZYN Z MACIERZA errorMatrix1
+		//	cout << errorMatrix1.getM() << " " << message.getN();
+		//	//Matrix multiply = errorMatrix1*message;
+		//	cout << (errorMatrix1*message).toString();
+		//}
 		result = " ";
 	}
 
